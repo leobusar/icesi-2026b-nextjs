@@ -1,3 +1,6 @@
+import { DomainError } from "../errors/domain-error";
+
+export class InvalidMoneyError extends DomainError {}
 export class Money {
     private constructor(readonly amount: number) {}
 
@@ -6,6 +9,10 @@ export class Money {
     }
 
     static zero(): Money {
+        throw new Error("TODO: not implemented");    
+    }
+
+    static times(factor: number): Money {
         throw new Error("TODO: not implemented");    
     }
 

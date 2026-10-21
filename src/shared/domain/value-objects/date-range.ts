@@ -1,3 +1,7 @@
+import { DomainError } from "../errors/domain-error";
+
+export class InvalidDateRangeError extends DomainError {}
+
 export class DateRange {
     private constructor (
         readonly start: Date, 
