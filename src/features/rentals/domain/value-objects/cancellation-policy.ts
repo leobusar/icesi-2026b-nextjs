@@ -1,5 +1,5 @@
 export interface CancellationPolicy {
     readonly minHoursBeforeStart: number;
-}
+};
 
-const STANDARD_CANCELLATION: CancellationPolicy = {minHoursBeforeStart: 24};
+export const STANDARD_CANCELLATION: CancellationPolicy = {minHoursBeforeStart: 24};

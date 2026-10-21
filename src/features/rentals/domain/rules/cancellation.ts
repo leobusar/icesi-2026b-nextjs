@@ -6,5 +6,5 @@ export function canCancel (
     now: Date, 
     policy: CancellationPolicy = STANDARD_CANCELLATION,
 ): boolean {
-    throw new Error("TODO: Not implemented");
+    return rental.period.hoursUntilStart(now) > policy.minHoursBeforeStart;
 }
