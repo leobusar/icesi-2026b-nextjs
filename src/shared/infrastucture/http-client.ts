@@ -19,15 +19,11 @@ export interface HttpClient {
 
 interface Options {
   baseUrl: string;
-  /** Cómo obtener el token. El cliente no sabe dónde se guarda. */
   getToken: () => string | null;
   fetchFn?: typeof fetch;
 }
 
-/**
- * Cliente HTTP compartido: centraliza la URL base, el token y el manejo
- * de errores comunes. Los repositorios de cada feature lo reciben inyectado.
- */
+
 export function createHttpClient({ baseUrl, getToken, fetchFn = (...args) => fetch(...args) }: Options): HttpClient {
   const request = async (method: string, path: string, body?: unknown): Promise<unknown> => {
     const token = getToken();

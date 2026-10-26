@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { UnauthenticatedError } from '@/shared/application/errors/application-errors';
-import { createHttpClient } from '@/shared/infrastructure/http-client';
+import { createHttpClient } from '@/shared/infrastucture/http-client';
 import { CancellationNotAllowedError } from '../../domain/errors/rental-errors';
 import { HttpRentalRepository } from './http-rental-repository';
 

@@ -1,4 +1,4 @@
-import { HttpError, type HttpClient } from '@/shared/infrastructure/http-client';
+import { HttpError, type HttpClient } from '@/shared/infrastucture/http-client';
 import type { RentalRepository } from '../../application/repositories/rental-repository';
 import type { Rental } from '../../domain/entities/rental';
 import { CancellationNotAllowedError, RentalNotFoundError } from '../../domain/errors/rental-errors';
