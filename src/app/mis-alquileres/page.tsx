@@ -1,4 +1,4 @@
-import MyRentals from '@/components/MyRentals';
+import { MyRentals } from '@/features/rentals';
 
 export default function MisAlquileresPage() {
   return (
