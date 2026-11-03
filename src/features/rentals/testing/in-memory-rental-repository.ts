@@ -1,4 +1,5 @@
-import type { RentalRepository } from '../application/repositories/rental-repository';
+import { Money } from '@/shared/domain/value-objects/money';
+import type { NewRental, RentalRepository } from '../application/repositories/rental-repository';
 import type { Rental } from '../domain/entities/rental';
 import { RentalNotFoundError } from '../domain/errors/rental-errors';
 
@@ -8,8 +9,11 @@ import { RentalNotFoundError } from '../domain/errors/rental-errors';
  */
 export class InMemoryRentalRepository implements RentalRepository {
   cancelled: number[] = [];
-  /** Si se define, cancel() lanza este error (simula que el servidor falla). */
+  created: NewRental[] = [];
+  /** Si se define, cancel()/create() lanza este error (simula que el servidor falla). */
   failCancelWith?: Error;
+  failCreateWith?: Error;
+  private nextId = 1000;
 
   constructor(private rentals: Rental[] = []) {}
 
@@ -22,5 +26,18 @@ export class InMemoryRentalRepository implements RentalRepository {
     if (!this.rentals.some((r) => r.id === rentalId)) throw new RentalNotFoundError(rentalId);
     this.rentals = this.rentals.filter((r) => r.id !== rentalId);
     this.cancelled.push(rentalId);
+  }
+
+  async create(newRental: NewRental): Promise<Rental> {
+    if (this.failCreateWith) throw this.failCreateWith;
+    this.created.push(newRental);
+    const rental: Rental = {
+      id: this.nextId++,
+      vehicle: { brand: 'Vehículo', model: `#${newRental.vehicleId}` },
+      period: newRental.period,
+      dailyRate: Money.zero(),
+    };
+    this.rentals.push(rental);
+    return rental;
   }
 }

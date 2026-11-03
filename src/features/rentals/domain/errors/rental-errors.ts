@@ -11,3 +11,12 @@ export class RentalNotFoundError extends DomainError {
     super(`El alquiler ${rentalId} no existe`);
   }
 }
+
+/** Las fechas o la duración de una reserva nueva no cumplen la política. */
+export class InvalidBookingError extends DomainError {}
+
+export class VehicleUnavailableError extends DomainError {
+  constructor(readonly vehicleId: number) {
+    super(`El vehículo ${vehicleId} ya no está disponible en esas fechas`);
+  }
+}

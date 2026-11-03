@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { UnauthenticatedError } from '@/shared/application/errors/application-errors';
 import { createHttpClient } from '@/shared/infrastucture/http-client';
-import { CancellationNotAllowedError } from '../../domain/errors/rental-errors';
+import { DateRange } from '@/shared/domain/value-objects/date-range';
+import { CancellationNotAllowedError, VehicleUnavailableError } from '../../domain/errors/rental-errors';
 import { HttpRentalRepository } from './http-rental-repository';
 
 /** fetch falso que responde según la ruta y registra lo que recibió. */
@@ -63,5 +64,41 @@ describe('HttpRentalRepository', () => {
   it('traduce un 401 a UnauthenticatedError', async () => {
     const { repository } = repositoryWith({ 'GET /rentals/me': { status: 401 } }, '');
     await expect(repository.findMine()).rejects.toBeInstanceOf(UnauthenticatedError);
+  });
+
+  it('crea una reserva y la devuelve traducida', async () => {
+    const { repository, calls } = repositoryWith({
+      'POST /rentals': {
+        status: 201,
+        body: {
+          id: 200,
+          vehicle_id: 3,
+          plate: 'BQX207',
+          brand_name: 'Kia',
+          model: 'Picanto',
+          category: 'ECONOMICO',
+          start_date: '2026-11-03T15:00:00.000Z',
+          end_date: '2026-11-05T15:00:00.000Z',
+          daily_rate: 85000,
+        },
+      },
+    });
+    const period = DateRange.create(new Date('2026-11-03T15:00:00.000Z'), new Date('2026-11-05T15:00:00.000Z'));
+
+    const rental = await repository.create({ vehicleId: 3, period });
+
+    expect(rental.id).toBe(200);
+    expect(JSON.parse(calls[0].init?.body as string)).toEqual({
+      vehicle_id: 3,
+      start_date: '2026-11-03T15:00:00.000Z',
+      end_date: '2026-11-05T15:00:00.000Z',
+    });
+  });
+
+  it('traduce un 409 a VehicleUnavailableError', async () => {
+    const { repository } = repositoryWith({ 'POST /rentals': { status: 409, body: { message: 'x' } } });
+    const period = DateRange.create(new Date('2026-11-03T15:00:00.000Z'), new Date('2026-11-05T15:00:00.000Z'));
+
+    await expect(repository.create({ vehicleId: 3, period })).rejects.toBeInstanceOf(VehicleUnavailableError);
   });
 });

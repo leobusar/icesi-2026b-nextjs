@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { InvalidDateRangeError } from '@/shared/domain/value-objects/date-range';
+import { DateRange, InvalidDateRangeError } from '@/shared/domain/value-objects/date-range';
 import type { RentalDto } from '../dtos/rental.dto';
-import { toRental } from './rental.mapper';
+import { toCreateRentalDto, toRental } from './rental.mapper';
 
 const dto: RentalDto = {
   id: 42,
@@ -26,5 +26,17 @@ describe('toRental', () => {
 
   it('rechaza en el borde un alquiler con fechas al revés', () => {
     expect(() => toRental({ ...dto, end_date: '2026-11-01T15:00:00.000Z' })).toThrow(InvalidDateRangeError);
+  });
+});
+
+describe('toCreateRentalDto', () => {
+  it('traduce el dominio al JSON que espera POST /rentals', () => {
+    const period = DateRange.create(new Date('2026-11-03T15:00:00.000Z'), new Date('2026-11-10T15:00:00.000Z'));
+
+    expect(toCreateRentalDto({ vehicleId: 5, period })).toEqual({
+      vehicle_id: 5,
+      start_date: '2026-11-03T15:00:00.000Z',
+      end_date: '2026-11-10T15:00:00.000Z',
+    });
   });
 });

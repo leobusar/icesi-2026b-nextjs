@@ -1,9 +1,13 @@
 import { HttpError, type HttpClient } from '@/shared/infrastucture/http-client';
-import type { RentalRepository } from '../../application/repositories/rental-repository';
+import type { NewRental, RentalRepository } from '../../application/repositories/rental-repository';
 import type { Rental } from '../../domain/entities/rental';
-import { CancellationNotAllowedError, RentalNotFoundError } from '../../domain/errors/rental-errors';
+import {
+  CancellationNotAllowedError,
+  RentalNotFoundError,
+  VehicleUnavailableError,
+} from '../../domain/errors/rental-errors';
 import type { RentalDto } from '../dtos/rental.dto';
-import { toRental } from '../mappers/rental.mapper';
+import { toCreateRentalDto, toRental } from '../mappers/rental.mapper';
 
 
 export class HttpRentalRepository implements RentalRepository {
@@ -21,6 +25,16 @@ export class HttpRentalRepository implements RentalRepository {
       // Traduce el "idioma HTTP" al idioma del negocio.
       if (error instanceof HttpError && error.status === 422) throw new CancellationNotAllowedError(rentalId);
       if (error instanceof HttpError && error.status === 404) throw new RentalNotFoundError(rentalId);
+      throw error;
+    }
+  }
+
+  async create(newRental: NewRental): Promise<Rental> {
+    try {
+      const dto = await this.http.post<RentalDto>('/rentals', toCreateRentalDto(newRental));
+      return toRental(dto);
+    } catch (error) {
+      if (error instanceof HttpError && error.status === 409) throw new VehicleUnavailableError(newRental.vehicleId);
       throw error;
     }
   }

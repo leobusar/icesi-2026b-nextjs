@@ -1,12 +1,14 @@
 'use client';
 import { createContext, useContext } from 'react';
 import type { CancelRental } from '../../application/use-cases/cancel-rental';
+import type { CreateRental } from '../../application/use-cases/create-rental';
 import type { ListMyRentals } from '../../application/use-cases/list-my-rentals';
 
 /** Los casos de uso que la presentación de rentals puede usar. */
 export interface RentalsUseCases {
   listMyRentals: ListMyRentals;
   cancelRental: CancelRental;
+  createRental: CreateRental;
 }
 
 /**
