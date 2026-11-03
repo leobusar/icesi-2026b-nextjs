@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { RentalsProvider } from '@/features/rentals';
+import { VehiclesProvider } from '@/features/vehicles';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -18,12 +19,15 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           </Link>
           <nav className="flex gap-5 text-sm">
             <Link href="/vehiculos">Vehículos</Link>
+            <Link href="/reservar">Reservar</Link>
             <Link href="/mis-alquileres">Mis alquileres</Link>
             <Link href="/login">Ingresar</Link>
           </nav>
         </header>
         <main className="mx-auto max-w-3xl px-4 py-8">
-          <RentalsProvider>{children}</RentalsProvider>
+          <VehiclesProvider>
+            <RentalsProvider>{children}</RentalsProvider>
+          </VehiclesProvider>
         </main>
       </body>
     </html>
