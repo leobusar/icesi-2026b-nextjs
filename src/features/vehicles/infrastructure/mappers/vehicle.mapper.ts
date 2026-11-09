@@ -5,12 +5,12 @@ import type { VehicleDto } from '../dtos/vehicle.dto';
 
 export function toVehicle(dto: VehicleDto): Vehicle {
   return {
-    id: dto.id,
+    id: Number(dto.id),
     plate: Plate.create(dto.plate),
-    brand: dto.brand_name,
+    brand: dto.brand,
     model: dto.model,
     year: dto.year,
     category: dto.category,
-    dailyRate: Money.cop(dto.daily_rate),
+    dailyRate: Money.cop(dto.dailyRate),
   };
 }

@@ -4,17 +4,17 @@ import type { VehicleDto } from '../dtos/vehicle.dto';
 import { toVehicle } from './vehicle.mapper';
 
 const dto: VehicleDto = {
-  id: 1,
+  id: '1',
   plate: 'KLM482',
-  brand_name: 'Mazda',
+  brand: 'Mazda',
   model: 'CX-30',
   year: 2024,
   category: 'SUV',
-  daily_rate: 150000,
+  dailyRate: 150000,
 };
 
 describe('toVehicle', () => {
-  it('traduce el JSON del backend a la entidad Vehicle', () => {
+  it('traduce la respuesta de GraphQL a la entidad Vehicle', () => {
     const vehicle = toVehicle(dto);
     expect(vehicle.id).toBe(1);
     expect(vehicle.plate.toString()).toBe('KLM-482');

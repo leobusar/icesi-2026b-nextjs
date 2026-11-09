@@ -1,12 +1,15 @@
 // API simulada del backend de alquiler de vehículos.
 // Imita la API de NestJS que ya conocen: mismas rutas, mismo JSON en snake_case.
-// No tiene dependencias: se ejecuta con `npm run api` (node mock-api/server.mjs).
+// Única excepción: /graphql, que devuelve camelCase (ver abajo). Se ejecuta
+// con `npm run api` (node mock-api/server.mjs).
 //
 // Usuarios de prueba:
 //   ana@correo.com   / 123456
 //   pedro@correo.com / 123456
 
 import { createServer } from 'node:http';
+import { buildSchema } from 'graphql';
+import { createHandler } from 'graphql-http/lib/use/http';
 
 const PORT = Number(process.env.PORT ?? 3001);
 const HOUR = 60 * 60 * 1000;
@@ -69,6 +72,60 @@ const toRentalJson = (rental) => {
 const overlaps = (aStart, aEnd, bStart, bEnd) => aStart < bEnd && bStart < aEnd;
 
 // ---------------------------------------------------------------------------
+// GraphQL: misma data y la misma regla de disponibilidad que GET /vehicles,
+// pero con nombres en camelCase (brand_name → brand, daily_rate → dailyRate).
+// Es la demostración de que el servidor puede reorganizar los datos sin que
+// el dominio ni la aplicación del frontend se enteren: solo cambia el
+// adaptador de infraestructura que los traduce.
+
+const graphqlSchema = buildSchema(`
+  enum VehicleCategory {
+    SUV
+    ECONOMICO
+    PICKUP
+  }
+
+  type Vehicle {
+    id: ID!
+    plate: String!
+    brand: String!
+    model: String!
+    year: Int!
+    category: VehicleCategory!
+    dailyRate: Int!
+  }
+
+  type Query {
+    availableVehicles(from: String!, to: String!): [Vehicle!]!
+  }
+`);
+
+const graphqlRoot = {
+  availableVehicles: ({ from, to }) => {
+    const f = Date.parse(from);
+    const t = Date.parse(to);
+    return vehicles
+      .filter(
+        (v) =>
+          !rentals.some(
+            (r) => r.vehicle_id === v.id && overlaps(f, t, Date.parse(r.start_date), Date.parse(r.end_date)),
+          ),
+      )
+      .map((v) => ({
+        id: v.id,
+        plate: v.plate,
+        brand: v.brand_name,
+        model: v.model,
+        year: v.year,
+        category: v.category,
+        dailyRate: v.daily_rate,
+      }));
+  },
+};
+
+const graphqlHandler = createHandler({ schema: graphqlSchema, rootValue: graphqlRoot });
+
+// ---------------------------------------------------------------------------
 
 const send = (res, status, body) => {
   res.writeHead(status, {
@@ -106,6 +163,16 @@ const server = createServer(async (req, res) => {
   const log = (status) => console.log(`${req.method} ${req.url} → ${status}`);
 
   if (req.method === 'OPTIONS') return send(res, 204);
+
+  // POST /graphql  { query: "{ availableVehicles(from: ..., to: ...) { ... } }" }
+  if (path === '/graphql') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    await graphqlHandler(req, res);
+    log(res.statusCode);
+    return;
+  }
 
   // POST /auth/login
   if (req.method === 'POST' && path === '/auth/login') {

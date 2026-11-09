@@ -1,10 +1,13 @@
-/** Forma EXACTA del JSON que devuelve GET /vehicles. */
+/**
+ * Forma EXACTA de lo que devuelve la consulta GraphQL `availableVehicles`.
+ * `id` llega como string: el tipo `ID` de GraphQL siempre se serializa así.
+ */
 export interface VehicleDto {
-  id: number;
+  id: string;
   plate: string;
-  brand_name: string;
+  brand: string;
   model: string;
   year: number;
   category: string;
-  daily_rate: number;
+  dailyRate: number;
 }

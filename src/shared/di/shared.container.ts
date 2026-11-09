@@ -1,5 +1,6 @@
 import { authContainer } from '@/features/auth/di/auth.container';
 import { config } from '../infrastucture/config';
+import { createGraphQLClient } from '../infrastucture/graphql-client';
 import { createHttpClient } from '../infrastucture/http-client';
 import { systemClock } from '../infrastucture/system-clock';
 
@@ -12,5 +13,8 @@ export const sharedContainer = {
   http: createHttpClient({
     baseUrl: config.apiUrl,
     getToken: () => authContainer.session.getAccessToken(),
+  }),
+  graphql: createGraphQLClient({
+    url: `${config.apiUrl}/graphql`,
   }),
 };

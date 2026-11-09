@@ -1,13 +1,15 @@
 import { sharedContainer } from '@/shared/di/shared.container';
 import { makeFindAvailableVehicles } from '../application/use-cases/find-available-vehicles';
-import { HttpVehicleRepository } from '../infrastructure/repositories/http-vehicle-repository';
+import { GraphQLVehicleRepository } from '../infrastructure/repositories/graphql-vehicle-repository';
 import type { VehiclesUseCases } from '../presentation/hooks/vehicles-context';
 
 /**
  * Composición de la feature: el ÚNICO archivo de vehicles que importa
- * de infrastructure/.
+ * de infrastructure/. GraphQLVehicleRepository implementa el mismo puerto
+ * VehicleRepository que antes implementaba HttpVehicleRepository (REST):
+ * cambiar de transporte fue cambiar esta línea, nada más.
  */
-const vehicles = new HttpVehicleRepository(sharedContainer.http);
+const vehicles = new GraphQLVehicleRepository(sharedContainer.graphql);
 
 export const vehiclesContainer: VehiclesUseCases = {
   findAvailableVehicles: makeFindAvailableVehicles({ vehicles }),
